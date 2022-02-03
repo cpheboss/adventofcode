@@ -19,8 +19,10 @@ gridComplete g = any (==complete) g
 oneGridComplete :: [[[Int]]] -> Bool
 oneGridComplete gs = any gridComplete gs
 
-gridScore :: [[Int]] -> Int
+allGridsComplete :: [[[Int]]] -> Bool
+allGridsComplete gs = (length gs == 1) && (gridComplete $ head gs)
 
+gridScore :: [[Int]] -> Int
 -- replace -1 with 0 before summing. Divide by 2 because we have both columns and rows
 -- it would also be possible to take the 5 first elements
 gridScore g = div (sum $ map sum $ map ( map (\n -> if (n == -1) then 0 else n)) g) 2
@@ -30,6 +32,13 @@ getResult1 grids (draw:draws)
   | oneGridComplete newGrid = draw * (gridScore (firstCompleteGrid newGrid))
   | otherwise = getResult1 newGrid draws
   where newGrid = map ( map ( map ( \n -> if (n==draw) then (-1) else n ))) grids
+
+getResult2 :: [[[Int]]] -> [Int] -> Int
+getResult2 grids (draw:draws)
+  | allGridsComplete newGrids = draw * (gridScore (firstCompleteGrid newGrids)) -- allGridsComplete is true only if one grid left
+  | otherwise = getResult2 newGrids draws
+  where gg = filter (not . gridComplete) grids -- filter out grids complete before this draw
+        newGrids = map ( map ( map ( \n -> if (n==draw) then (-1) else n ))) gg -- replace draw in remaining grids
 
 main = do
     file:args <- getArgs
@@ -58,5 +67,8 @@ main = do
     putStrLn "grids2 = "
     print grids2
 
-    putStrLn "result = "
+    putStrLn "result1 = "
     print $ getResult1 grids2 drawList
+
+    putStrLn "result2 = "
+    print $ getResult2 grids2 drawList
