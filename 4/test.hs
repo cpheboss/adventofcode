@@ -3,28 +3,31 @@ import Data.List
 import Data.List.Split
 import System.Environment
 
-complete = [-1,-1,-1,-1,-1]
+data Slot = Crossed | Slot Int deriving(Eq,Show)
+complete = replicate 5 Crossed
 
-firstCompleteGrid :: [[[Int]]] -> Maybe [[Int]]
+firstCompleteGrid :: [[[Slot]]] -> Maybe [[Slot]]
 firstCompleteGrid [] = Nothing
 firstCompleteGrid (grid : grids)
   | gridComplete grid = Just grid
   | otherwise = firstCompleteGrid grids
 
-gridComplete :: [[Int]] -> Bool
+gridComplete :: [[Slot]] -> Bool
 gridComplete g = any (==complete) g
 
-gridScore :: [[Int]] -> Int
--- replace -1 with 0 before summing. Divide by 2 because we have both columns and rows
--- it would also be possible to take the 5 first elements
-gridScore g = div (sum $ map ( sum . ( map (\n -> if (n == -1) then 0 else n))) g) 2
+slotScore :: Slot -> Int
+slotScore Crossed = 0
+slotScore (Slot n) = n
 
-getResult1 :: [[[Int]]] -> [Int] -> Int
+gridScore :: [[Slot]] -> Int
+gridScore g = div (sum $ map ( sum . ( map (slotScore))) g) 2
+
+getResult1 :: [[[Slot]]] -> [Int] -> Int
 getResult1 grids (draw : draws) =
   case firstCompleteGrid newGrid of
     Just completedGrid -> draw * gridScore completedGrid
     Nothing -> getResult1 newGrid draws
-  where newGrid = map ( map ( map ( \n -> if (n==draw) then (-1) else n ))) grids
+  where newGrid = map ( map ( map ( \n -> if (n==Slot draw) then Crossed else n ))) grids
 
 main = do
     file : args <- getArgs
@@ -40,7 +43,7 @@ main = do
     print drawList
     
     -- remove empty strings and convert to int
-    let gridLines = map (map (read::String->Int) . words) $ filter (not . null) gridsStr
+    let gridLines = map (map (Slot . (read::String->Int)) . words) $ filter (not . null) gridsStr
     putStrLn "gridLines = "
     mapM print gridLines
     
