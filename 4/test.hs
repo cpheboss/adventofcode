@@ -5,47 +5,42 @@ import System.Environment
 
 complete = [-1,-1,-1,-1,-1]
 
--- I first had firstCompleteGrid :: [[[Int]]] -> Maybe [[Int]]. But as I do not want to manage the Nothing case when
--- called, I replaced it with this implementation. What is the best way?
-firstCompleteGrid :: [[[Int]]] -> [[Int]]
-firstCompleteGrid [] = []
-firstCompleteGrid (grid:grids)
-  | gridComplete grid = grid
+firstCompleteGrid :: [[[Int]]] -> Maybe [[Int]]
+firstCompleteGrid [] = Nothing
+firstCompleteGrid (grid : grids)
+  | gridComplete grid = Just grid
   | otherwise = firstCompleteGrid grids
 
 gridComplete :: [[Int]] -> Bool
 gridComplete g = any (==complete) g
 
-oneGridComplete :: [[[Int]]] -> Bool
-oneGridComplete gs = any gridComplete gs
-
 gridScore :: [[Int]] -> Int
-
 -- replace -1 with 0 before summing. Divide by 2 because we have both columns and rows
 -- it would also be possible to take the 5 first elements
-gridScore g = div (sum $ map sum $ map ( map (\n -> if (n == -1) then 0 else n)) g) 2
+gridScore g = div (sum $ map ( sum . ( map (\n -> if (n == -1) then 0 else n))) g) 2
 
 getResult1 :: [[[Int]]] -> [Int] -> Int
-getResult1 grids (draw:draws)
-  | oneGridComplete newGrid = draw * (gridScore (firstCompleteGrid newGrid))
-  | otherwise = getResult1 newGrid draws
+getResult1 grids (draw : draws) =
+  case firstCompleteGrid newGrid of
+    Just completedGrid -> draw * gridScore completedGrid
+    Nothing -> getResult1 newGrid draws
   where newGrid = map ( map ( map ( \n -> if (n==draw) then (-1) else n ))) grids
 
 main = do
-    file:args <- getArgs
+    file : args <- getArgs
     putStrLn $ "Reading " ++ file
     line <- readFile file
     putStrLn "line = "
     print line
     
-    let drawStr:gridsStr = lines line
+    let drawStr : gridsStr = lines line
      
     let drawList = map (read::String->Int) $ splitOn "," drawStr
     putStrLn "drawList = "
     print drawList
     
     -- remove empty strings and convert to int
-    let gridLines = map (map (read::String->Int)) $ map words $ filter (not . null) gridsStr
+    let gridLines = map (map (read::String->Int) . words) $ filter (not . null) gridsStr
     putStrLn "gridLines = "
     mapM print gridLines
     
