@@ -5,13 +5,6 @@ import System.Environment
                                                                                                                         
 import Debug.Trace                                                                                                      
                                                                                                                         
-doBirth (f0:f1:f2:f3:f4:f5:f6:f7:f8:_) = traceShow (f1:f2:f3:f4:f5:f6:f7+f0:f8:f0:[]) (f1:f2:f3:f4:f5:f6:f7+f0:f8:f0:[])
-doBirth _ = []                                                                                                          
-                                                                                                                        
-addFishes 0 fishes = fishes                                                                                             
-addFishes n fishes = addFishes (n-1) newFishes                                                                          
-  where newFishes = doBirth fishes                                                                                      
-                                                                                                                        
 main = do                                                                                                               
     file:args <- getArgs                                                                                                
     putStrLn $ "Reading " ++ file                                                                                       
@@ -19,3 +12,11 @@ main = do
     putStrLn "line = "                                                                                                  
     print line                                                                                                          
 
+    let crabPos = map (read::String->Int) $ words $ map (\c -> if c==',' then ' ' else c) line
+    putStrLn "crabPos ="
+    print crabPos
+
+    -- Calculate all possibilities and take the less consuming one
+    let result1 = minimum $ map sum $ map (\n -> map (\x -> abs (x-n)) crabPos) [(minimum crabPos)..(maximum crabPos)]
+    putStrLn "result1 ="
+    print result1
