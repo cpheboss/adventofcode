@@ -4,30 +4,29 @@ import System.Environment
 import Text.Regex.TDFA
 import Debug.Trace
 import qualified Data.Map.Strict as Map
+import qualified Data.Text as T
 
-getDigits :: String -> [String]
-getDigits s = getAllTextMatches (s =~ "[0-9]") :: [String]
+getDigits :: T.Text -> [T.Text]
+getDigits s = getAllTextMatches (s =~ "[0-9]") :: [T.Text]
 
-toInt :: String -> Int
-toInt = read::String->Int
-
-joinFirstAndLast :: [String] -> String
-joinFirstAndLast [] = "0"
-joinFirstAndLast x = head x ++ last x
-
-result1 :: [String] -> String
-result1 (lines) = do
-    let stringDigits = map getDigits lines
-    let intStrings = map joinFirstAndLast stringDigits
-    let ints = map toInt intStrings
-    let res = sum ints
-    traceShow res ""
-
-    show res
+toInt :: T.Text -> Int
+toInt text = (read::String->Int) $ T.unpack text
 
 
-result2 :: [String] -> String
+joinFirstAndLast :: [T.Text] -> T.Text
+joinFirstAndLast [] = T.pack "0"
+joinFirstAndLast x = head x <> last x
+
+result1 :: [T.Text] -> T.Text
+result1 lines = T.pack $ show res
+    where
+        stringDigits = map getDigits lines
+        intStrings = map joinFirstAndLast stringDigits
+        ints = map toInt intStrings
+        res = sum ints
+        
+
+result2 :: [T.Text] -> T.Text
 result2 (lines) = do
-    let numbers = Map.fromList [("one", "1"), ("two", "2"), ("three", "3"), ("four","4"), ("five","5"), ("six", "6"), ("seven", "7"), ("eight", "8"), ("nine", "9"), ("zero", "0")]
-    traceShow numbers ""
-    ""
+    let numbers = Map.fromList [("one", "o1e"), ("two", "t2w"), ("three", "t3e"), ("four","f4r"), ("five","f5e"), ("six", "s6x"), ("seven", "s7n"), ("eight", "e8t"), ("nine", "n9e"), ("zero", "z0o")]
+    traceShow numbers (T.pack "")
